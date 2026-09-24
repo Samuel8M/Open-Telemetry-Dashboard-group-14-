@@ -1,0 +1,28 @@
+kind = "data-app"
+previewPath = "/"
+title = "Model Telemetry"
+description = "A transparent dashboard for comparing local AI model and coding-agent runs by answer quality, speed, token usage, and laptop CPU, memory, and GPU telemetry. Includes clearly labeled sample data until a local collector is connected."
+version = "1.0.0"
+id = "artifacts/model-telemetry"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18648
+
+[services.development]
+run = "pnpm --filter @workspace/model-telemetry run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/model-telemetry", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/model-telemetry/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18648"
+BASE_PATH = "/"

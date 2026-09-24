@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: telemetry
+    description: Local AI model benchmark telemetry
 paths:
   /healthz:
     get:
@@ -24,6 +26,33 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /telemetry/dashboard:
+    get:
+      operationId: getTelemetryDashboard
+      tags: [telemetry]
+      summary: Get the model telemetry dashboard
+      parameters:
+        - name: window
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [7d, 30d, 90d]
+            default: 30d
+        - name: scenario
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [all, code-fix, summarization, data-extraction]
+            default: all
+      responses:
+        "200":
+          description: Dashboard metrics, explicitly marked as illustrative sample data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelemetryDashboard"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +62,164 @@ components:
           type: string
       required:
         - status
+    TelemetryDashboard:
+      type: object
+      required: [dataMode, generatedAt, attribution, device, collector, summary, scenarios, resourceTrend, modelComparisons, recentRuns]
+      properties:
+        dataMode:
+          type: string
+          enum: [illustrative-sample]
+        generatedAt:
+          type: string
+          format: date-time
+        attribution:
+          type: string
+        device:
+          $ref: "#/components/schemas/TelemetryDevice"
+        collector:
+          $ref: "#/components/schemas/CollectorStatus"
+        summary:
+          $ref: "#/components/schemas/TelemetrySummary"
+        scenarios:
+          type: array
+          items:
+            $ref: "#/components/schemas/TelemetryScenario"
+        resourceTrend:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResourcePoint"
+        modelComparisons:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModelComparison"
+        recentRuns:
+          type: array
+          items:
+            $ref: "#/components/schemas/BenchmarkRun"
+    TelemetryDevice:
+      type: object
+      required: [machineLabel, operatingSystem, cpu, gpu, memoryGb]
+      properties:
+        machineLabel:
+          type: string
+        operatingSystem:
+          type: string
+        cpu:
+          type: string
+        gpu:
+          type: string
+        memoryGb:
+          type: number
+    CollectorStatus:
+      type: object
+      required: [state, message]
+      properties:
+        state:
+          type: string
+          enum: [disconnected]
+        message:
+          type: string
+        lastSeen:
+          type: ["string", "null"]
+          format: date-time
+    TelemetrySummary:
+      type: object
+      required: [runs, models, averageQuality, medianTokensPerSecond, peakMemoryGb, localGpuObserved]
+      properties:
+        runs:
+          type: integer
+        models:
+          type: integer
+        averageQuality:
+          type: number
+        medianTokensPerSecond:
+          type: number
+        peakMemoryGb:
+          type: number
+        localGpuObserved:
+          type: boolean
+    TelemetryScenario:
+      type: object
+      required: [id, label]
+      properties:
+        id:
+          type: string
+          enum: [code-fix, summarization, data-extraction]
+        label:
+          type: string
+    ResourcePoint:
+      type: object
+      required: [timestamp, cpuPercent, memoryGb, gpuPercent]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        cpuPercent:
+          type: number
+        memoryGb:
+          type: number
+        gpuPercent:
+          type: ["number", "null"]
+    ModelComparison:
+      type: object
+      required: [model, provider, runtime, runs, qualityScore, timeToFirstTokenMs, tokensPerSecond, peakMemoryGb, averageCpuPercent, averageGpuPercent, estimatedCostUsd]
+      properties:
+        model:
+          type: string
+        provider:
+          type: string
+        runtime:
+          type: string
+          enum: [local, cloud-client]
+        runs:
+          type: integer
+        qualityScore:
+          type: number
+        timeToFirstTokenMs:
+          type: number
+        tokensPerSecond:
+          type: number
+        peakMemoryGb:
+          type: number
+        averageCpuPercent:
+          type: number
+        averageGpuPercent:
+          type: ["number", "null"]
+        estimatedCostUsd:
+          type: number
+    BenchmarkRun:
+      type: object
+      required: [id, timestamp, scenarioId, scenarioLabel, model, provider, runtime, durationSeconds, qualityScore, tokensPerSecond, peakMemoryGb, averageCpuPercent, averageGpuPercent, estimatedCostUsd]
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        scenarioId:
+          type: string
+          enum: [code-fix, summarization, data-extraction]
+        scenarioLabel:
+          type: string
+        model:
+          type: string
+        provider:
+          type: string
+        runtime:
+          type: string
+          enum: [local, cloud-client]
+        durationSeconds:
+          type: number
+        qualityScore:
+          type: number
+        tokensPerSecond:
+          type: number
+        peakMemoryGb:
+          type: number
+        averageCpuPercent:
+          type: number
+        averageGpuPercent:
+          type: ["number", "null"]
+        estimatedCostUsd:
+          type: number
 
