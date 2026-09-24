@@ -12,12 +12,16 @@ export interface ModelComparison {
   provider: string;
   runtime: ModelComparisonRuntime;
   runs: number;
-  qualityScore: number;
-  timeToFirstTokenMs: number;
-  tokensPerSecond: number;
+  /** @nullable */
+  qualityScore: number | null;
+  /** @nullable */
+  timeToFirstTokenMs: number | null;
+  /** @nullable */
+  tokensPerSecond: number | null;
   peakMemoryGb: number;
   averageCpuPercent: number;
   /** @nullable */
   averageGpuPercent: number | null;
-  estimatedCostUsd: number;
+  /** @nullable */
+  estimatedCostUsd: number | null;
 }

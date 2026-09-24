@@ -14,6 +14,7 @@ export type TelemetryDashboardDataMode = typeof TelemetryDashboardDataMode[keyof
 
 export const TelemetryDashboardDataMode = {
   'illustrative-sample': 'illustrative-sample',
+  'imported-local': 'imported-local',
 } as const;
 
 export interface TelemetryDevice {
@@ -29,6 +30,7 @@ export type CollectorStatusState = typeof CollectorStatusState[keyof typeof Coll
 
 export const CollectorStatusState = {
   disconnected: 'disconnected',
+  'imported-file': 'imported-file',
 } as const;
 
 export interface CollectorStatus {
@@ -41,8 +43,10 @@ export interface CollectorStatus {
 export interface TelemetrySummary {
   runs: number;
   models: number;
-  averageQuality: number;
-  medianTokensPerSecond: number;
+  /** @nullable */
+  averageQuality: number | null;
+  /** @nullable */
+  medianTokensPerSecond: number | null;
   peakMemoryGb: number;
   localGpuObserved: boolean;
 }
@@ -82,14 +86,18 @@ export interface ModelComparison {
   provider: string;
   runtime: ModelComparisonRuntime;
   runs: number;
-  qualityScore: number;
-  timeToFirstTokenMs: number;
-  tokensPerSecond: number;
+  /** @nullable */
+  qualityScore: number | null;
+  /** @nullable */
+  timeToFirstTokenMs: number | null;
+  /** @nullable */
+  tokensPerSecond: number | null;
   peakMemoryGb: number;
   averageCpuPercent: number;
   /** @nullable */
   averageGpuPercent: number | null;
-  estimatedCostUsd: number;
+  /** @nullable */
+  estimatedCostUsd: number | null;
 }
 
 export type BenchmarkRunScenarioId = typeof BenchmarkRunScenarioId[keyof typeof BenchmarkRunScenarioId];
@@ -118,13 +126,16 @@ export interface BenchmarkRun {
   provider: string;
   runtime: BenchmarkRunRuntime;
   durationSeconds: number;
-  qualityScore: number;
-  tokensPerSecond: number;
+  /** @nullable */
+  qualityScore: number | null;
+  /** @nullable */
+  tokensPerSecond: number | null;
   peakMemoryGb: number;
   averageCpuPercent: number;
   /** @nullable */
   averageGpuPercent: number | null;
-  estimatedCostUsd: number;
+  /** @nullable */
+  estimatedCostUsd: number | null;
 }
 
 export interface TelemetryDashboard {

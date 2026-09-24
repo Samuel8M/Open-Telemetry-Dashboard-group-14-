@@ -68,7 +68,7 @@ components:
       properties:
         dataMode:
           type: string
-          enum: [illustrative-sample]
+          enum: [illustrative-sample, imported-local]
         generatedAt:
           type: string
           format: date-time
@@ -116,7 +116,7 @@ components:
       properties:
         state:
           type: string
-          enum: [disconnected]
+          enum: [disconnected, imported-file]
         message:
           type: string
         lastSeen:
@@ -131,9 +131,9 @@ components:
         models:
           type: integer
         averageQuality:
-          type: number
+          type: ["number", "null"]
         medianTokensPerSecond:
-          type: number
+          type: ["number", "null"]
         peakMemoryGb:
           type: number
         localGpuObserved:
@@ -174,11 +174,11 @@ components:
         runs:
           type: integer
         qualityScore:
-          type: number
+          type: ["number", "null"]
         timeToFirstTokenMs:
-          type: number
+          type: ["number", "null"]
         tokensPerSecond:
-          type: number
+          type: ["number", "null"]
         peakMemoryGb:
           type: number
         averageCpuPercent:
@@ -186,7 +186,7 @@ components:
         averageGpuPercent:
           type: ["number", "null"]
         estimatedCostUsd:
-          type: number
+          type: ["number", "null"]
     BenchmarkRun:
       type: object
       required: [id, timestamp, scenarioId, scenarioLabel, model, provider, runtime, durationSeconds, qualityScore, tokensPerSecond, peakMemoryGb, averageCpuPercent, averageGpuPercent, estimatedCostUsd]
@@ -211,9 +211,9 @@ components:
         durationSeconds:
           type: number
         qualityScore:
-          type: number
+          type: ["number", "null"]
         tokensPerSecond:
-          type: number
+          type: ["number", "null"]
         peakMemoryGb:
           type: number
         averageCpuPercent:
@@ -221,5 +221,5 @@ components:
         averageGpuPercent:
           type: ["number", "null"]
         estimatedCostUsd:
-          type: number
+          type: ["number", "null"]
 

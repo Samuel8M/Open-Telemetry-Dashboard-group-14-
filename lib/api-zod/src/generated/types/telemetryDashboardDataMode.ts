@@ -11,4 +11,5 @@ export type TelemetryDashboardDataMode = typeof TelemetryDashboardDataMode[keyof
 
 export const TelemetryDashboardDataMode = {
   'illustrative-sample': 'illustrative-sample',
+  'imported-local': 'imported-local',
 } as const;

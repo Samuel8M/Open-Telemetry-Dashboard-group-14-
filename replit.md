@@ -1,6 +1,6 @@
-# [Project name]
+# Model Telemetry
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Compare AI model and coding-agent quality, speed, cost, and local laptop resource usage using transparent benchmark telemetry.
 
 ## Run & Operate
 
@@ -22,15 +22,22 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- Dashboard UI: `artifacts/model-telemetry`
+- Local standardized Ollama runner and setup guide: `artifacts/model-telemetry/public/benchmark.py` and `benchmark-readme.txt`
+- Optional manual command collector: `artifacts/model-telemetry/public/collector.py`
+- Telemetry API: `artifacts/api-server/src/routes/telemetry.ts`
+- API contract: `lib/api-spec/openapi.yaml`
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Cloud coding agents expose only their local client footprint; the UI must never imply that provider-side GPU or CPU usage is measured.
+- The dashboard defaults to an empty measurements view; the API's illustrative example is accessible only via an explicit switch. Local benchmark files are imported into browser storage, not uploaded to the API.
+- The downloadable Python runner drives locally installed Ollama: model pulls require explicit opt-in, and model selection is bounded by laptop RAM and disk checks. It runs the same prompts on each model and measures Ollama-process CPU/RAM plus Ollama-reported generation speed.
+- Workload check scores are narrow deterministic checks, not general model-quality ratings. GPU, time to first token, and cost are unavailable unless separately measured or supplied; never replace missing values with invented numbers.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+A local open-model benchmarking workflow: users download a Python runner, choose quantized Ollama models and authorize any downloads, run standardized workloads on macOS or Windows laptops, then import JSON results to compare token speed, fixed workload checks, and process CPU/RAM use.
 
 ## User preferences
 

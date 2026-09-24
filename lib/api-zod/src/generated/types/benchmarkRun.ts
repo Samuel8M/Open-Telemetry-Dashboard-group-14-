@@ -17,11 +17,14 @@ export interface BenchmarkRun {
   provider: string;
   runtime: BenchmarkRunRuntime;
   durationSeconds: number;
-  qualityScore: number;
-  tokensPerSecond: number;
+  /** @nullable */
+  qualityScore: number | null;
+  /** @nullable */
+  tokensPerSecond: number | null;
   peakMemoryGb: number;
   averageCpuPercent: number;
   /** @nullable */
   averageGpuPercent: number | null;
-  estimatedCostUsd: number;
+  /** @nullable */
+  estimatedCostUsd: number | null;
 }

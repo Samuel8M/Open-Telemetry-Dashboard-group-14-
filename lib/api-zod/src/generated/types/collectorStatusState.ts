@@ -11,4 +11,5 @@ export type CollectorStatusState = typeof CollectorStatusState[keyof typeof Coll
 
 export const CollectorStatusState = {
   disconnected: 'disconnected',
+  'imported-file': 'imported-file',
 } as const;

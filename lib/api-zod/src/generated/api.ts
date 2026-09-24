@@ -29,7 +29,7 @@ export const GetTelemetryDashboardQueryParams = zod.object({
 })
 
 export const GetTelemetryDashboardResponse = zod.object({
-  "dataMode": zod.enum(['illustrative-sample']),
+  "dataMode": zod.enum(['illustrative-sample', 'imported-local']),
   "generatedAt": zod.coerce.date(),
   "attribution": zod.string(),
   "device": zod.object({
@@ -40,15 +40,15 @@ export const GetTelemetryDashboardResponse = zod.object({
   "memoryGb": zod.number()
 }),
   "collector": zod.object({
-  "state": zod.enum(['disconnected']),
+  "state": zod.enum(['disconnected', 'imported-file']),
   "message": zod.string(),
   "lastSeen": zod.coerce.date().nullish()
 }),
   "summary": zod.object({
   "runs": zod.number().int(),
   "models": zod.number().int(),
-  "averageQuality": zod.number(),
-  "medianTokensPerSecond": zod.number(),
+  "averageQuality": zod.number().nullable(),
+  "medianTokensPerSecond": zod.number().nullable(),
   "peakMemoryGb": zod.number(),
   "localGpuObserved": zod.boolean()
 }),
@@ -67,13 +67,13 @@ export const GetTelemetryDashboardResponse = zod.object({
   "provider": zod.string(),
   "runtime": zod.enum(['local', 'cloud-client']),
   "runs": zod.number().int(),
-  "qualityScore": zod.number(),
-  "timeToFirstTokenMs": zod.number(),
-  "tokensPerSecond": zod.number(),
+  "qualityScore": zod.number().nullable(),
+  "timeToFirstTokenMs": zod.number().nullable(),
+  "tokensPerSecond": zod.number().nullable(),
   "peakMemoryGb": zod.number(),
   "averageCpuPercent": zod.number(),
   "averageGpuPercent": zod.number().nullable(),
-  "estimatedCostUsd": zod.number()
+  "estimatedCostUsd": zod.number().nullable()
 })),
   "recentRuns": zod.array(zod.object({
   "id": zod.string(),
@@ -84,12 +84,12 @@ export const GetTelemetryDashboardResponse = zod.object({
   "provider": zod.string(),
   "runtime": zod.enum(['local', 'cloud-client']),
   "durationSeconds": zod.number(),
-  "qualityScore": zod.number(),
-  "tokensPerSecond": zod.number(),
+  "qualityScore": zod.number().nullable(),
+  "tokensPerSecond": zod.number().nullable(),
   "peakMemoryGb": zod.number(),
   "averageCpuPercent": zod.number(),
   "averageGpuPercent": zod.number().nullable(),
-  "estimatedCostUsd": zod.number()
+  "estimatedCostUsd": zod.number().nullable()
 }))
 })
 

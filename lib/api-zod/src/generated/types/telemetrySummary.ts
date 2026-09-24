@@ -9,8 +9,10 @@
 export interface TelemetrySummary {
   runs: number;
   models: number;
-  averageQuality: number;
-  medianTokensPerSecond: number;
+  /** @nullable */
+  averageQuality: number | null;
+  /** @nullable */
+  medianTokensPerSecond: number | null;
   peakMemoryGb: number;
   localGpuObserved: boolean;
 }

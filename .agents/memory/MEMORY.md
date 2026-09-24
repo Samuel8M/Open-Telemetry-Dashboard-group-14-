@@ -1,0 +1,1 @@
+- [Python package install side effects](python-package-install-side-effects.md) — temporary Python dependencies can scaffold root files and alter Replit config in a pnpm workspace.
