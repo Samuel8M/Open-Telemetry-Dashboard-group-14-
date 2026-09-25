@@ -1,1 +1,2 @@
 - [Python package install side effects](python-package-install-side-effects.md) — temporary Python dependencies can scaffold root files and alter Replit config in a pnpm workspace.
+- [Curated private-model catalog](curated-private-model-catalog.md) — claim local download-and-train support only for verified safetensors and LoRA combinations.
