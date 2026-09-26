@@ -17,18 +17,73 @@ from pathlib import Path
 MODELS = {
     "smollm2-135m": {
         "repository": "HuggingFaceTB/SmolLM2-135M-Instruct",
+        "revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+        "license": "Apache-2.0",
+        "architecture": "LlamaForCausalLM",
+        "model_type": "llama",
+        "lora_targets": ("q_proj", "v_proj"),
         "minimum_ram": 4,
         "download_bytes": 1024 ** 3,
     },
+    "smollm2-360m": {
+        "repository": "HuggingFaceTB/SmolLM2-360M-Instruct",
+        "revision": "a10cc1512eabd3dde888204e902eca88bddb4951",
+        "license": "Apache-2.0",
+        "architecture": "LlamaForCausalLM",
+        "model_type": "llama",
+        "lora_targets": ("q_proj", "v_proj"),
+        "minimum_ram": 8,
+        "download_bytes": 2 * 1024 ** 3,
+    },
     "qwen2.5-0.5b": {
         "repository": "Qwen/Qwen2.5-0.5B-Instruct",
+        "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+        "license": "Apache-2.0",
+        "architecture": "Qwen2ForCausalLM",
+        "model_type": "qwen2",
+        "lora_targets": ("q_proj", "v_proj"),
         "minimum_ram": 8,
         "download_bytes": 3 * 1024 ** 3,
     },
     "qwen2.5-1.5b": {
         "repository": "Qwen/Qwen2.5-1.5B-Instruct",
+        "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+        "license": "Apache-2.0",
+        "architecture": "Qwen2ForCausalLM",
+        "model_type": "qwen2",
+        "lora_targets": ("q_proj", "v_proj"),
         "minimum_ram": 12,
         "download_bytes": 7 * 1024 ** 3,
+    },
+    "tinyllama-1.1b": {
+        "repository": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        "revision": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+        "license": "Apache-2.0",
+        "architecture": "LlamaForCausalLM",
+        "model_type": "llama",
+        "lora_targets": ("q_proj", "v_proj"),
+        "minimum_ram": 12,
+        "download_bytes": 5 * 1024 ** 3,
+    },
+    "pythia-160m": {
+        "repository": "EleutherAI/pythia-160m",
+        "revision": "50f5173d932e8e61f858120bcb800b97af589f46",
+        "license": "Apache-2.0",
+        "architecture": "GPTNeoXForCausalLM",
+        "model_type": "gpt_neox",
+        "lora_targets": ("query_key_value",),
+        "minimum_ram": 4,
+        "download_bytes": 2 * 1024 ** 3,
+    },
+    "pythia-410m": {
+        "repository": "EleutherAI/pythia-410m",
+        "revision": "9879c9b5f8bea9051dcb0e68dff21493d67e9d4f",
+        "license": "Apache-2.0",
+        "architecture": "GPTNeoXForCausalLM",
+        "model_type": "gpt_neox",
+        "lora_targets": ("query_key_value",),
+        "minimum_ram": 8,
+        "download_bytes": 3 * 1024 ** 3,
     },
 }
 
@@ -125,7 +180,24 @@ def check_local_model(key):
         raise RuntimeError("No safetensors weights found in " + str(directory) + ". Re-download this model.")
     if not (directory / "config.json").is_file():
         raise RuntimeError("Local config.json is missing from " + str(directory) + ". Re-download this model.")
+    verify_model_config(key, directory)
     return directory
+
+
+def verify_model_config(key, directory):
+    spec = model_spec(key)
+    try:
+        config = json.loads((directory / "config.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise RuntimeError("Could not read local model config.json: " + str(error)) from error
+    if (not isinstance(config, dict) or config.get("model_type") != spec["model_type"]
+            or not isinstance(config.get("architectures"), list)
+            or spec["architecture"] not in config["architectures"]):
+        raise RuntimeError(
+            "Unsupported or changed architecture for " + key + ": expected "
+            + spec["architecture"] + " (" + spec["model_type"]
+            + "). This preset cannot load arbitrary or gated checkpoints."
+        )
 
 
 def verify_shard_index(directory):
@@ -184,10 +256,12 @@ def command_download(args):
         ) from error
 
     print("Downloading the explicitly selected public repository " + spec["repository"])
+    print("License: " + spec["license"] + "; pinned revision: " + spec["revision"])
     print("Destination: " + str(destination))
     try:
         snapshot_download(
             repo_id=spec["repository"],
+            revision=spec["revision"],
             local_dir=str(destination),
             allow_patterns=[
                 "*.safetensors",
@@ -206,7 +280,8 @@ def command_download(args):
     except Exception as error:
         raise RuntimeError(
             "Public model download failed for " + spec["repository"] + ": " + str(error)
-            + ". Check internet access, repository availability, license/terms, and free disk space."
+            + ". Gated or private repositories are unsupported; check internet access, "
+            "repository availability, license/terms, and free disk space."
         ) from error
     if not list(destination.glob("*.safetensors")) or not (destination / "config.json").is_file():
         raise RuntimeError(
@@ -214,6 +289,8 @@ def command_download(args):
             "No GGUF or remote-code fallback is supported."
         )
     verify_shard_index(destination)
+    verify_model_config(key, destination)
+    verify_lora_tensors(key, destination)
     print("Download complete. Weights are in " + str(destination))
 
 
@@ -289,6 +366,21 @@ def scan_safetensors(directory):
     return total_parameters, total_tensors, examples
 
 
+def verify_lora_tensors(key, directory):
+    """Check that the downloaded safetensors contain every preset's LoRA target."""
+    targets = model_spec(key)["lora_targets"]
+    found = set()
+    for path in directory.glob("*.safetensors"):
+        for name in safetensors_header(path):
+            found.update(target for target in targets if name.endswith("." + target + ".weight"))
+    missing = set(targets) - found
+    if missing:
+        raise RuntimeError(
+            "Unsupported or incomplete safetensors for " + key + ": missing LoRA module weights "
+            + ", ".join(sorted(missing)) + ". Re-download the curated checkpoint; GGUF and arbitrary repositories are unsupported."
+        )
+
+
 def read_architecture(directory):
     try:
         config = json.loads((directory / "config.json").read_text(encoding="utf-8"))
@@ -308,6 +400,7 @@ def command_inspect(args):
     spec = model_spec(key)
     directory = check_local_model(key)
     verify_shard_index(directory)
+    verify_lora_tensors(key, directory)
     parameter_count, tensor_count, tensors = scan_safetensors(directory)
     adapter_path = adapter_directory(key)
     adapter = None
@@ -511,6 +604,7 @@ def command_train(args):
         raise RuntimeError("Training steps must be between 1 and " + str(MAX_STEPS) + ".")
     directory = check_local_model(key)
     verify_shard_index(directory)
+    verify_lora_tensors(key, directory)
     check_training_resources(key)
     destination = adapter_directory(key)
     if destination.is_symlink():
@@ -535,7 +629,7 @@ def command_train(args):
         trust_remote_code=False,
         use_safetensors=True,
     )
-    target_modules = ["q_proj", "v_proj"]
+    target_modules = list(model_spec(key)["lora_targets"])
     try:
         lora_model = packages["get_peft_model"](
             base_model,
@@ -549,7 +643,7 @@ def command_train(args):
         )
     except Exception as error:
         raise RuntimeError(
-            "Could not attach LoRA to the local model's q_proj/v_proj modules. "
+            "Could not attach LoRA to the local model's " + "/".join(target_modules) + " modules. "
             "This model architecture is not supported by this preset: " + str(error)
         ) from error
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -659,6 +753,7 @@ def command_chat(args):
     key = args.model
     directory = check_local_model(key)
     verify_shard_index(directory)
+    verify_lora_tensors(key, directory)
     packages = import_training_packages()
     adapter_path = adapter_directory(key)
     if args.adapter and not (adapter_path / "adapter_config.json").is_file():
@@ -718,10 +813,34 @@ def run_self_tests():
         def test_allowlist_is_exact(self):
             self.assertEqual(
                 set(MODELS),
-                {"smollm2-135m", "qwen2.5-0.5b", "qwen2.5-1.5b"},
+                {"smollm2-135m", "smollm2-360m", "qwen2.5-0.5b", "qwen2.5-1.5b",
+                 "tinyllama-1.1b", "pythia-160m", "pythia-410m"},
             )
             with self.assertRaises(RuntimeError):
                 model_spec("some-other-model")
+
+        def test_architecture_and_lora_targets(self):
+            with tempfile.TemporaryDirectory() as temp:
+                directory = Path(temp)
+                for key, spec in MODELS.items():
+                    (directory / "config.json").write_text(json.dumps({
+                        "architectures": [spec["architecture"]], "model_type": spec["model_type"]
+                    }), encoding="utf-8")
+                    verify_model_config(key, directory)
+                    header = {
+                        "model.layers.0." + target + ".weight": {
+                            "dtype": "F32", "shape": [2, 2], "data_offsets": [0, 16]
+                        } for target in spec["lora_targets"]
+                    }
+                    raw = json.dumps(header).encode("utf-8")
+                    (directory / "model.safetensors").write_bytes(struct.pack("<Q", len(raw)) + raw)
+                    verify_lora_tensors(key, directory)
+                (directory / "config.json").write_text('{"architectures":["Wrong"],"model_type":"other"}')
+                with self.assertRaisesRegex(RuntimeError, "Unsupported or changed architecture"):
+                    verify_model_config("pythia-160m", directory)
+                (directory / "model.safetensors").write_bytes(struct.pack("<Q", 2) + b"{}")
+                with self.assertRaisesRegex(RuntimeError, "missing LoRA module"):
+                    verify_lora_tensors("pythia-160m", directory)
 
         def test_roles(self):
             self.assertEqual(tensor_role("model.embed_tokens.weight"), "embedding")

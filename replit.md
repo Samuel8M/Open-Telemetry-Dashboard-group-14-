@@ -32,7 +32,7 @@ Guide beginners through a tiny, trainable browser model alongside transparent la
 ## Architecture decisions
 
 - The three workshop routes `/`, `/interpret`, and `/adjust` teach with a tiny English next-character model that runs entirely in the browser tab. It is not an open-weight LLM. Training text and adjusted weights stay in tab memory and reset on refresh. No download, login, terminal, API call, or upload is needed. Benchmarks remain at `/benchmarks`.
-- The optional standalone Python CLI and kit still exist in `public/` for advanced local open-weight downloads and LoRA training, but are not part of the main browser workshop. Ollama GGUF inference downloads are a separate path and are not directly fine-tuned.
+- The optional local training kit at `/local-models` offers seven pinned, curated public safetensors checkpoints and a standalone Python CLI for advanced laptop LoRA training. It is separate from the three-page browser workshop and does not run training on the site. Ollama GGUF inference downloads are a separate path and are not directly fine-tuned.
 - Cloud coding agents expose only their local client footprint; the UI must never imply that provider-side GPU or CPU usage is measured.
 - The dashboard defaults to an empty measurements view; the API's illustrative example is accessible only via an explicit switch. Local benchmark files are imported into browser storage, not uploaded to the API.
 - The downloadable Python runner drives locally installed Ollama: model pulls require explicit opt-in, and model selection is bounded by laptop RAM and disk checks. It runs the same prompts on each model and measures Ollama-process CPU/RAM plus Ollama-reported generation speed.

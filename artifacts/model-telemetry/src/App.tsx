@@ -6,6 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import Dashboard from '@/pages/dashboard';
 import Workshop from '@/pages/workshop';
+import BrowserWorkshop from '@/pages/browser-workshop';
 import ModelInterpret from '@/pages/model-interpret';
 import ModelAdjust from '@/pages/model-adjust';
 import { BrowserModelProvider } from '@/lib/workshop/browser-model-context';
@@ -29,9 +30,10 @@ function Router() {
       <WorkspaceNavigation />
       <RoutedErrorBoundary>
         <Switch>
-          <Route path="/" component={Workshop} />
+          <Route path="/" component={BrowserWorkshop} />
           <Route path="/interpret" component={ModelInterpret} />
           <Route path="/adjust" component={ModelAdjust} />
+          <Route path="/local-models" component={Workshop} />
           <Route path="/benchmarks" component={Dashboard} />
           <Route component={NotFound} />
         </Switch>
@@ -44,6 +46,7 @@ function WorkspaceNavigation() {
   const [location] = useLocation();
   const links = [
     { href: '/', label: 'Model workshop', testId: 'link-workshop' },
+    { href: '/local-models', label: 'Local training kit', testId: 'link-local-models' },
     { href: '/benchmarks', label: 'Benchmarks', testId: 'link-benchmarks' },
   ];
   useEffect(() => {
@@ -51,6 +54,7 @@ function WorkspaceNavigation() {
       '/': 'Start a Tiny Model | Model Telemetry',
       '/interpret': 'See Model Weights | Model Telemetry',
       '/adjust': 'Teach with Your Text | Model Telemetry',
+      '/local-models': 'Local Training Kit | Model Telemetry',
       '/benchmarks': 'Benchmarks | Model Telemetry',
     };
     document.title = titles[location] ?? 'Model Telemetry';
@@ -58,6 +62,7 @@ function WorkspaceNavigation() {
       '/': 'Start a tiny practice model in your browser with no download.',
       '/interpret': 'See what a tiny browser model learned from letters.',
       '/adjust': 'Teach a tiny model with your own text right in your browser tab.',
+      '/local-models': 'Explore curated open-weight checkpoints and train LoRA adapters privately on your own laptop.',
       '/benchmarks': 'Explore measurements from local AI model benchmarks.',
     };
     for (const selector of ['meta[name="description"]', 'meta[property="og:description"]', 'meta[name="twitter:description"]']) {

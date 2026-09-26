@@ -1,22 +1,30 @@
 PRIVATE MODEL — LOCAL DOWNLOAD, WEIGHT INSPECTION, AND LoRA
 
-This standalone Python CLI works with three curated public open-weight model
-repositories only:
+This standalone Python CLI works with seven curated public open-weight model
+repositories only. The license shown is the repository's model-card license
+at catalog verification; check its current terms before downloading:
 
-  smollm2-135m  -> HuggingFaceTB/SmolLM2-135M-Instruct
-  qwen2.5-0.5b  -> Qwen/Qwen2.5-0.5B-Instruct
-  qwen2.5-1.5b  -> Qwen/Qwen2.5-1.5B-Instruct
+  smollm2-135m  -> HuggingFaceTB/SmolLM2-135M-Instruct  (Llama, Apache-2.0)
+  smollm2-360m  -> HuggingFaceTB/SmolLM2-360M-Instruct  (Llama, Apache-2.0)
+  qwen2.5-0.5b  -> Qwen/Qwen2.5-0.5B-Instruct          (Qwen2, Apache-2.0)
+  qwen2.5-1.5b  -> Qwen/Qwen2.5-1.5B-Instruct          (Qwen2, Apache-2.0)
+  tinyllama-1.1b -> TinyLlama/TinyLlama-1.1B-Chat-v1.0 (Llama, Apache-2.0)
+  pythia-160m   -> EleutherAI/pythia-160m               (GPT-NeoX, Apache-2.0)
+  pythia-410m   -> EleutherAI/pythia-410m               (GPT-NeoX, Apache-2.0)
 
 The script contains a fixed allowlist. It does not accept arbitrary repository
 IDs, use gated-model assumptions, execute repository code, or support GGUF.
-Review each model's current license and usage terms before downloading.
+Each preset pins a specific public repository revision and checks the local
+architecture and LoRA module weights before use. Pythia checkpoints are base
+completion models, not instruction/chat-tuned; their responses to chat prompts
+may be continuations rather than helpful answers.
 
 PRIVACY AND NETWORK BOUNDARIES
 
 - `download` is the explicit opt-in to fetch public model files from Hugging
   Face. The files are placed in ./private-models/<model-key>. The downloader
-  requests safetensors weights, config, and tokenizer assets only; it does not
-  download or execute custom model code.
+  requests safetensors weights, config, and tokenizer assets only from a pinned
+  revision; it does not download or execute custom model code.
 - `train` does not download models or call hosted services. It sets Hugging
   Face/Transformers offline flags and disables WandB/telemetry before importing
   ML libraries, then loads the already-downloaded model with local-files-only
@@ -92,7 +100,8 @@ Windows:
 
     py private-model.py download --model smollm2-135m
 
-The other allowed keys are `qwen2.5-0.5b` and `qwen2.5-1.5b`. Downloaded files
+Other allowed keys: `smollm2-360m`, `qwen2.5-0.5b`, `qwen2.5-1.5b`,
+`tinyllama-1.1b`, `pythia-160m`, and `pythia-410m`. Downloaded files
 are kept in `./private-models/<key>`. A failed or incomplete download is
 reported; inspect the local directory and rerun the explicit download command
 if necessary. Gated/private repositories and GGUF files are not supported.
@@ -196,8 +205,14 @@ MODEL SIZE AND PLATFORM NOTES
 - `smollm2-135m` is the smallest, CPU-friendly preset and the recommended
   starting point. Larger models require capable RAM and may be impractical to
   fine-tune on a CPU. The CLI guardrails require at least 4 GiB total RAM for
-  135M, 8 GiB for 0.5B, and 12 GiB for 1.5B; actual training requirements can
-  be higher.
+  SmolLM2 135M and Pythia 160M, 8 GiB for SmolLM2 360M, Pythia 410M and
+  Qwen 0.5B, and 12 GiB for TinyLlama 1.1B and Qwen 1.5B. The download
+  disk guardrails (plus a 0.5 GiB safety margin) are 1, 2, 2, 3, 3,
+  5, and 7 GiB respectively in that order; these are estimates, not exact
+  file sizes. Actual training memory requirements can be higher.
+- Llama and Qwen2 presets attach LoRA to q_proj/v_proj. GPT-NeoX Pythia
+  presets attach LoRA to the fused query_key_value projection. The CLI checks
+  the safetensors headers for those weights and refuses changed architectures.
 - The script uses CUDA when PyTorch reports it available; otherwise it uses
   CPU. GPU hardware and drivers vary. A guardrail passing does not promise
   successful model loading or training.
