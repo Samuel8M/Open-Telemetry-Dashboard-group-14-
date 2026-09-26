@@ -1,0 +1,54 @@
+MODEL STUDIO — BEGINNER GUIDE
+
+Model Studio is a local desktop companion for supported open-weight
+models. Extract the ZIP to a folder you control, then double-click
+start-mac.command on macOS or start-windows.bat on Windows. Python 3.10 or
+newer must already be installed (including the Python launcher on Windows).
+The launcher creates an isolated .venv beside the app, installs dependencies
+on the first launch only, and opens the local three-step interface. First setup
+requires internet and may take a long time because PyTorch and related packages
+are large. The first model download also requires internet.
+
+STEP 1 — DOWNLOAD WEIGHTS
+Choose a model and select Download model. This is an explicit internet
+download from the listed public model repository. The app shows an estimated
+disk-space guardrail for each model. Estimates and CLI checks cannot guarantee
+enough space. Download time depends on your connection.
+
+STEP 2 — UNDERSTAND WEIGHTS
+Select See my model after downloading. The app reads local safetensors
+headers and displays counts and one simple role clue. Numeric parameter counts
+are not facts, knowledge, quality, accuracy, or capability. The role classifier
+uses tensor names and is only a rough explanation.
+
+STEP 3 — TEACH WITH MY TEXT
+Select Teach with my text to open the native file picker, choose a short local
+UTF-8 .txt or .jsonl file (up to 32 KB), then confirm to continue. This simple
+limit avoids the fixed beginner training preset rejecting a large file.
+Cancelling the picker stops
+without training. For the strongest privacy, disconnect Wi-Fi or other internet
+access before confirming. The training CLI sets offline library flags and loads local files,
+but those flags are NOT a firewall. The selected file is processed by the local
+training process and is not submitted to this web app. The underlying CLI can
+use larger files with a manually chosen training budget, but this simple app
+does not offer that setting. Training creates a
+separate LoRA adapter; the downloaded base weights stay unchanged. If an
+adapter already exists, the app asks before allowing it to be replaced.
+
+HARDWARE, TIME, AND SECURITY
+Start with the smallest supported model. The app shows a total-RAM guardrail
+for each choice; actual memory needs can be higher. CPU training can be very
+slow, and some computers may not
+have a compatible PyTorch build. Keep sufficient free disk space for both
+weights and adapter. Failures are shown in the app; successful completion is
+not reported until the local command exits successfully.
+
+These launchers and scripts are unsigned. macOS or Windows may show an
+operating-system security warning. Only continue if you trust the source; OS
+security prompts are separate from Python and model setup. Review the supported
+model license/terms before downloading. Neither the launchers nor this guide
+promise that a specific machine has sufficient hardware.
+
+No actual Mac or Windows computer was available for training validation during
+development. The package and command construction have standard-library-only
+headless self-tests, but those are not a substitute for real platform testing.

@@ -8,6 +8,7 @@ import Dashboard from '@/pages/dashboard';
 import Workshop from '@/pages/workshop';
 import ModelInterpret from '@/pages/model-interpret';
 import ModelAdjust from '@/pages/model-adjust';
+import { BrowserModelProvider } from '@/lib/workshop/browser-model-context';
 import {
   Link,
   Route,
@@ -47,12 +48,21 @@ function WorkspaceNavigation() {
   ];
   useEffect(() => {
     const titles: Record<string, string> = {
-      '/': 'Step 1: Get a model | Model Telemetry',
-      '/interpret': 'Step 2: Understand weights | Model Telemetry',
-      '/adjust': 'Step 3: Teach your model | Model Telemetry',
+      '/': 'Start a Tiny Model | Model Telemetry',
+      '/interpret': 'See Model Weights | Model Telemetry',
+      '/adjust': 'Teach with Your Text | Model Telemetry',
       '/benchmarks': 'Benchmarks | Model Telemetry',
     };
     document.title = titles[location] ?? 'Model Telemetry';
+    const descriptions: Record<string, string> = {
+      '/': 'Start a tiny practice model in your browser with no download.',
+      '/interpret': 'See what a tiny browser model learned from letters.',
+      '/adjust': 'Teach a tiny model with your own text right in your browser tab.',
+      '/benchmarks': 'Explore measurements from local AI model benchmarks.',
+    };
+    for (const selector of ['meta[name="description"]', 'meta[property="og:description"]', 'meta[name="twitter:description"]']) {
+      document.querySelector(selector)?.setAttribute('content', descriptions[location] ?? descriptions['/']);
+    }
   }, [location]);
   return (
     <nav aria-label="Workspace sections" className="print-hide flex items-center gap-1 border-b border-border bg-card px-4 py-2 sm:px-10">
@@ -83,9 +93,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-          <Router />
-        </WouterRouter>
+        <BrowserModelProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+            <Router />
+          </WouterRouter>
+        </BrowserModelProvider>
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>

@@ -1,6 +1,6 @@
 # Model Telemetry
 
-Guide beginners through three simple pages for local open-weight models, private adapter training, and transparent laptop benchmarks.
+Guide beginners through a tiny, trainable browser model alongside transparent laptop benchmarks.
 
 ## Run & Operate
 
@@ -31,9 +31,8 @@ Guide beginners through three simple pages for local open-weight models, private
 
 ## Architecture decisions
 
-- The workshop has one main step per page: download at `/`, understand weight metadata at `/interpret`, and train a local adapter on private text at `/adjust`. Benchmarks remain at `/benchmarks`. The website never pretends to install or train a model on the visitor's computer.
-- The hosted site never reads or uploads the user's private training text. Model selection is stored locally in the browser; a training path is only used to compose a terminal command. A locally run Python CLI explicitly downloads public, full safetensors checkpoints and trains local LoRA adapters with offline libraries. Ollama GGUF inference downloads are a separate path and are not directly fine-tuned.
-- The weight-report import shows local tensor metadata and adapter parameter counts, not interpretable facts inside individual numeric weights. Reports stay in browser memory, not on the server.
+- The three workshop routes `/`, `/interpret`, and `/adjust` teach with a tiny English next-character model that runs entirely in the browser tab. It is not an open-weight LLM. Training text and adjusted weights stay in tab memory and reset on refresh. No download, login, terminal, API call, or upload is needed. Benchmarks remain at `/benchmarks`.
+- The optional standalone Python CLI and kit still exist in `public/` for advanced local open-weight downloads and LoRA training, but are not part of the main browser workshop. Ollama GGUF inference downloads are a separate path and are not directly fine-tuned.
 - Cloud coding agents expose only their local client footprint; the UI must never imply that provider-side GPU or CPU usage is measured.
 - The dashboard defaults to an empty measurements view; the API's illustrative example is accessible only via an explicit switch. Local benchmark files are imported into browser storage, not uploaded to the API.
 - The downloadable Python runner drives locally installed Ollama: model pulls require explicit opt-in, and model selection is bounded by laptop RAM and disk checks. It runs the same prompts on each model and measures Ollama-process CPU/RAM plus Ollama-reported generation speed.
@@ -41,11 +40,11 @@ Guide beginners through three simple pages for local open-weight models, private
 
 ## Product
 
-A three-page guided local-model workspace: users choose a supported open-weight checkpoint and download it on their own laptop, import a small local metadata report to understand its weights, then train a LoRA adapter on their own private text. The separate benchmarks page compares imported Ollama runs without presenting examples as real measurements.
+A no-download browser workshop in three steps: start a tiny practice model, see a next-letter guess made from its weights, and teach it with pasted text. The separate benchmarks page compares imported Ollama runs without presenting examples as real measurements.
 
 ## User preferences
 
-- Keep the workshop simple enough for a beginner: download weights → understand weights → adjust with private text. Each page gets exactly one main button; short help links may explain setup. Do not add extra action buttons or pretend a hosted site can train on the visitor's laptop.
+- Keep the browser workshop simple enough for a beginner. Each route has one obvious main button and brief optional help. No downloadable-app requirement. Never present the tiny browser exercise as full LLM fine-tuning or claim private text was uploaded.
 
 ## Gotchas
 
