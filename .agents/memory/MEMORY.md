@@ -1,2 +1,3 @@
 - [Python package install side effects](python-package-install-side-effects.md) — temporary Python dependencies can scaffold root files and alter Replit config in a pnpm workspace.
 - [Curated private-model catalog](curated-private-model-catalog.md) — claim local download-and-train support only for verified safetensors and LoRA combinations.
+- [GitHub connector uploads](github-connector-uploads.md) — use binary-safe Git blobs when inline source uploads return non-JSON proxy errors.
